@@ -16,7 +16,8 @@
     "test:report": "rm -rf .nyc_output && rm -rf coverage && npx nyc --reporter=text --reporter=html npm run test:controller",
     "install:local": "npm i ../controllers/packages/solana-controllers/*.tgz &&  npm i ../controllers/packages/base-controllers/*.tgz",
     "locale": "node ./src/scripts/importLocales.mjs",
-    "serve:prod": "vue-cli-service serve --mode production"
+    "serve:prod": "vue-cli-service serve --mode production",
+    "prettier-check": "prettier --check ."
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^1.5.0",
