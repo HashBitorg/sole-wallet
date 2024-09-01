@@ -1,29 +1,65 @@
 <script setup lang="ts">
 import { createTransfer } from "@solana/pay";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { LAMPORTS_PER_SOL, ParsedAccountData, PublicKey, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import {
+  LAMPORTS_PER_SOL,
+  ParsedAccountData,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import { ContactPayload } from "@toruslabs/base-controllers";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, maxValue, minValue, required } from "@vuelidate/validators";
 import { BigNumber } from "bignumber.js";
 import { debounce } from "lodash-es";
 import log from "loglevel";
-import { computed, defineAsyncComponent, onMounted, reactive, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
-import { Button, Card, ComboBox, SelectField, TextField } from "@/components/common";
+import {
+  Button,
+  Card,
+  ComboBox,
+  SelectField,
+  TextField,
+} from "@/components/common";
 import { useEstimateChanges } from "@/components/payments/EstimateChangesComposable";
 import TokenBalance from "@/components/TokenBalance.vue";
 import { nftTokens, tokens } from "@/components/transfer/token-helper";
-import { addressPromise, isOwnerEscrow } from "@/components/transfer/transfer-helper";
+import {
+  addressPromise,
+  isOwnerEscrow,
+} from "@/components/transfer/transfer-helper";
 import TransferTokenSelect from "@/components/transfer/TransferTokenSelect.vue";
-import { trackUserClick, TransferPageInteractions } from "@/directives/google-analytics";
+import {
+  trackUserClick,
+  TransferPageInteractions,
+} from "@/directives/google-analytics";
 import ControllerModule, { torus } from "@/modules/controllers";
-import { ALLOWED_VERIFIERS, ALLOWED_VERIFIERS_ERRORS, STATUS, STATUS_TYPE, TransferType } from "@/utils/enums";
+import {
+  ALLOWED_VERIFIERS,
+  ALLOWED_VERIFIERS_ERRORS,
+  STATUS,
+  STATUS_TYPE,
+  TransferType,
+} from "@/utils/enums";
 import { delay } from "@/utils/helpers";
 import { SolAndSplToken } from "@/utils/interfaces";
-import { calculateTxFee, generateSolTransaction, generateSPLTransaction, ruleVerifierId } from "@/utils/solanaHelpers";
+import {
+  calculateTxFee,
+  generateSolTransaction,
+  generateSPLTransaction,
+  ruleVerifierId,
+} from "@/utils/solanaHelpers";
 
 import CheckBox from "../../components/common/CheckBox.vue";
 
@@ -61,17 +97,34 @@ const router = useRouter();
 const route = useRoute();
 
 const AsyncTransferConfirm = defineAsyncComponent({
-  loader: () => import(/* webpackPrefetch: true */ /* webpackChunkName: "TransferConfirm" */ "@/components/transfer/TransferConfirm.vue"),
+  loader: () =>
+    import(
+      /* webpackPrefetch: true */ /* webpackChunkName: "TransferConfirm" */ "@/components/transfer/TransferConfirm.vue"
+    ),
 });
 const AsyncMessageModal = defineAsyncComponent({
-  loader: () => import(/* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/common/MessageModal.vue"),
+  loader: () =>
+    import(
+      /* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/common/MessageModal.vue"
+    ),
 });
 const AsyncTransferNFTModal = defineAsyncComponent({
-  loader: () => import(/* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/transfer/TransferNFT.vue"),
+  loader: () =>
+    import(
+      /* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/transfer/TransferNFT.vue"
+    ),
 });
-const hasGeckoPrice = computed(() => selectedToken.value.symbol === "SOL" || !!selectedToken.value.price?.usd);
+const hasGeckoPrice = computed(
+  () =>
+    selectedToken.value.symbol === "SOL" || !!selectedToken.value.price?.usd,
+);
 
-const { hasEstimationError, estimatedBalanceChange, estimationInProgress, estimateChanges } = useEstimateChanges();
+const {
+  hasEstimationError,
+  estimatedBalanceChange,
+  estimationInProgress,
+  estimateChanges,
+} = useEstimateChanges();
 
 const memo = ref("");
 const reference = ref<string[] | undefined>();
@@ -80,7 +133,9 @@ onMounted(() => {
   const { query } = route;
   // Show mint if passed
   if (query.mint) {
-    const el = [...tokens.value, ...nftTokens.value].find((x) => x.mintAddress === query.mint);
+    const el = [...tokens.value, ...nftTokens.value].find(
+      (x) => x.mintAddress === query.mint,
+    );
     selectedToken.value = el || tokens.value[0];
 
     showAmountField.value = !!selectedToken.value.isFungible;
@@ -110,7 +165,7 @@ const contacts = computed(() =>
       text: `${contact.display_name} (${contact.contact_verifier_id})`,
       value: contact.contact_verifier_id,
     };
-  })
+  }),
 );
 
 const messageModalState = reactive({
@@ -150,15 +205,20 @@ const tokenAddressVerifier = async (value: string) => {
 
   // if succeeds, we assume that the account is account key is correct.
   // Transfer in TorusController with derive the associated token address using the same function.
-  associatedAccount = !associatedAccount ? new PublicKey(value) : associatedAccount;
+  associatedAccount = !associatedAccount
+    ? new PublicKey(value)
+    : associatedAccount;
   try {
     await getAssociatedTokenAddress(mintAddress, associatedAccount, false);
     return true;
   } catch (e) {
-    log.info("failed to generate associatedAccount, account key in might be associatedAccount");
+    log.info(
+      "failed to generate associatedAccount, account key in might be associatedAccount",
+    );
   }
 
-  const accountInfo = await torus.connection.getParsedAccountInfo(associatedAccount);
+  const accountInfo =
+    await torus.connection.getParsedAccountInfo(associatedAccount);
   // check if the assoc account is (owned by) token selected
   if (accountInfo.value?.owner.equals(TOKEN_PROGRAM_ID)) {
     const data = accountInfo.value.data as ParsedAccountData;
@@ -199,7 +259,9 @@ const getErrorMessage = () => {
  */
 function convertCryptoToFiat(cryptoValue = 1) {
   const selectedCrypto = selectedToken.value.symbol?.toLowerCase();
-  const selectedFiat = (currency.value === "sol" ? "usd" : currency.value).toLowerCase();
+  const selectedFiat = (
+    currency.value === "sol" ? "usd" : currency.value
+  ).toLowerCase();
   if (selectedCrypto === "sol") {
     return cryptoValue * solConversionRate.value;
   }
@@ -207,13 +269,20 @@ function convertCryptoToFiat(cryptoValue = 1) {
 }
 
 const getTokenBalance = () => {
-  if (selectedToken.value.symbol?.toUpperCase() === "SOL") return Number(ControllerModule.solBalance);
+  if (selectedToken.value.symbol?.toUpperCase() === "SOL")
+    return Number(ControllerModule.solBalance);
   return selectedToken.value.balance?.uiAmount || 0;
 };
 
 // proceed to validatation only if checkbox is click
-const lengthCheck = (min: number, max: number, contactValue: string): boolean => {
-  return !checked.value || (contactValue.length >= min && contactValue.length <= max);
+const lengthCheck = (
+  min: number,
+  max: number,
+  contactValue: string,
+): boolean => {
+  return (
+    !checked.value || (contactValue.length >= min && contactValue.length <= max)
+  );
 };
 
 const isAlnum = (contactValue: string): boolean => {
@@ -229,28 +298,51 @@ const rules = computed(() => {
     transferTo: {
       validTransferTo: helpers.withMessage(getErrorMessage, validVerifier),
       required: helpers.withMessage(t("walletTransfer.required"), required),
-      addressExists: helpers.withMessage(snsError.value, helpers.withAsync(snsRule)),
-      tokenAddress: helpers.withMessage(t("walletTransfer.invalidAddress"), helpers.withAsync(tokenAddressVerifier)),
-      escrowAccount: helpers.withMessage(t("walletTransfer.escrowAccount"), helpers.withAsync(escrowAccountVerifier)),
+      addressExists: helpers.withMessage(
+        snsError.value,
+        helpers.withAsync(snsRule),
+      ),
+      tokenAddress: helpers.withMessage(
+        t("walletTransfer.invalidAddress"),
+        helpers.withAsync(tokenAddressVerifier),
+      ),
+      escrowAccount: helpers.withMessage(
+        t("walletTransfer.escrowAccount"),
+        helpers.withAsync(escrowAccountVerifier),
+      ),
     },
     sendAmount: {
       required: helpers.withMessage(t("walletTransfer.minTransfer"), required),
-      greaterThanZero: helpers.withMessage(t("walletTransfer.minTransfer"), minValue(isCurrencyFiat.value ? convertCryptoToFiat(0.0001) : 0.0001)),
+      greaterThanZero: helpers.withMessage(
+        t("walletTransfer.minTransfer"),
+        minValue(isCurrencyFiat.value ? convertCryptoToFiat(0.0001) : 0.0001),
+      ),
       lessThanBalance: helpers.withMessage(
         t("walletTransfer.insufficientBalance"),
-        maxValue(isCurrencyFiat.value ? convertCryptoToFiat(getTokenBalance()) : getTokenBalance())
+        maxValue(
+          isCurrencyFiat.value
+            ? convertCryptoToFiat(getTokenBalance())
+            : getTokenBalance(),
+        ),
       ),
       nft: helpers.withMessage(t("walletTransfer.NFT"), nftVerifier),
     },
     contactName: {
       required: helpers.withMessage("Required", isRequiredandCheckbox),
       checkIsAlnum: helpers.withMessage("Name should be alphanumeric", isAlnum),
-      lengthCheck: helpers.withMessage("Name should be less than 255 characters", (contactValue: string) => lengthCheck(0, 255, contactValue)),
+      lengthCheck: helpers.withMessage(
+        "Name should be less than 255 characters",
+        (contactValue: string) => lengthCheck(0, 255, contactValue),
+      ),
     },
   };
 });
 
-const $v = useVuelidate(rules, { transferTo: transferToInternal, sendAmount, contactName });
+const $v = useVuelidate(rules, {
+  transferTo: transferToInternal,
+  sendAmount,
+  contactName,
+});
 
 /**
  * converts the fiatValue from selected fiat currency to selected crypto currency
@@ -258,23 +350,33 @@ const $v = useVuelidate(rules, { transferTo: transferToInternal, sendAmount, con
  */
 function convertFiatToCrypto(fiatValue = 1) {
   const selectedCrypto = selectedToken.value.symbol?.toLowerCase();
-  const selectedFiat = (currency.value === "sol" ? "usd" : currency.value).toLowerCase();
+  const selectedFiat = (
+    currency.value === "sol" ? "usd" : currency.value
+  ).toLowerCase();
   if (selectedCrypto === "sol") {
     return fiatValue / solConversionRate.value;
   }
   return fiatValue / (selectedToken.value?.price?.[selectedFiat] || 1);
 }
 
-const generateTransaction = async (amount: number): Promise<VersionedTransaction> => {
+const generateTransaction = async (
+  amount: number,
+): Promise<VersionedTransaction> => {
   // SolanaPay or URL transfer
   if (reference.value || memo.value.length > 0) {
-    const solPayTransaction = await createTransfer(torus.connection, new PublicKey(ControllerModule.selectedAddress), {
-      recipient: new PublicKey(resolvedAddress.value),
-      reference: reference.value?.map((item) => new PublicKey(item)),
-      memo: memo.value,
-      splToken: selectedToken.value.mintAddress ? new PublicKey(selectedToken.value?.mintAddress) : undefined,
-      amount: new BigNumber(amount),
-    });
+    const solPayTransaction = await createTransfer(
+      torus.connection,
+      new PublicKey(ControllerModule.selectedAddress),
+      {
+        recipient: new PublicKey(resolvedAddress.value),
+        reference: reference.value?.map((item) => new PublicKey(item)),
+        memo: memo.value,
+        splToken: selectedToken.value.mintAddress
+          ? new PublicKey(selectedToken.value?.mintAddress)
+          : undefined,
+        amount: new BigNumber(amount),
+      },
+    );
     if (solPayTransaction.feePayer && solPayTransaction.recentBlockhash) {
       const messageV0 = new TransactionMessage({
         payerKey: solPayTransaction?.feePayer,
@@ -292,16 +394,25 @@ const generateTransaction = async (amount: number): Promise<VersionedTransaction
       amount * 10 ** (selectedToken?.value?.data?.decimals || 0),
       selectedToken.value as SolAndSplToken,
       ControllerModule.selectedAddress,
-      torus.connection
+      torus.connection,
     );
   } else {
     // SOL TRANSFER
-    transaction.value = await generateSolTransaction(resolvedAddress.value, amount, ControllerModule.selectedAddress, torus.connection);
+    transaction.value = await generateSolTransaction(
+      resolvedAddress.value,
+      amount,
+      ControllerModule.selectedAddress,
+      torus.connection,
+    );
   }
   return transaction.value as VersionedTransaction;
 };
 
-const showMessageModal = (params: { messageTitle: string; messageDescription?: string; messageStatus: STATUS_TYPE }) => {
+const showMessageModal = (params: {
+  messageTitle: string;
+  messageDescription?: string;
+  messageStatus: STATUS_TYPE;
+}) => {
   const { messageDescription, messageTitle, messageStatus } = params;
   messageModalState.messageDescription = messageDescription || "";
   messageModalState.messageTitle = messageTitle;
@@ -333,7 +444,10 @@ const openModal = async () => {
   await $v.value.$validate();
   if (!$v.value.$invalid) {
     if (transferType.value.value === "sns") {
-      const address = await addressPromise(transferType.value.value, transferTo.value); // doesn't throw
+      const address = await addressPromise(
+        transferType.value.value,
+        transferTo.value,
+      ); // doesn't throw
       if (address) {
         resolvedAddress.value = address;
       } else {
@@ -344,7 +458,10 @@ const openModal = async () => {
     if (checked.value && contactName.value.length) {
       const contactPayload: ContactPayload = {
         display_name: contactName.value,
-        contact_verifier: transferType.value.value === "sol" ? "solana" : transferType.value.value,
+        contact_verifier:
+          transferType.value.value === "sol"
+            ? "solana"
+            : transferType.value.value,
         contact_verifier_id: transferTo.value,
       };
       await ControllerModule.addContact(contactPayload);
@@ -356,11 +473,20 @@ const openModal = async () => {
 
   // This can't be guarantee
 
-  const amount = isCurrencyFiat.value ? convertFiatToCrypto(sendAmount.value) : sendAmount.value;
+  const amount = isCurrencyFiat.value
+    ? convertFiatToCrypto(sendAmount.value)
+    : sendAmount.value;
   try {
     transaction.value = await generateTransaction(amount);
-    estimateChanges(transaction.value, torus.connection, ControllerModule.selectedAddress);
-    const { blockHash, height, fee } = await calculateTxFee(transaction.value.message, torus.connection);
+    estimateChanges(
+      transaction.value,
+      torus.connection,
+      ControllerModule.selectedAddress,
+    );
+    const { blockHash, height, fee } = await calculateTxFee(
+      transaction.value.message,
+      torus.connection,
+    );
     blockhash.value = blockHash;
     lastValidBlockHeight.value = height;
     transactionFee.value = fee / LAMPORTS_PER_SOL;
@@ -370,7 +496,11 @@ const openModal = async () => {
     log.error(e);
     closeModal();
     const err = e as Error;
-    showMessageModal({ messageTitle: err.name, messageDescription: err.message, messageStatus: STATUS.ERROR });
+    showMessageModal({
+      messageTitle: err.name,
+      messageDescription: err.message,
+      messageStatus: STATUS.ERROR,
+    });
   }
 };
 
@@ -390,7 +520,9 @@ const confirmTransfer = async () => {
   } catch (error) {
     log.error(error);
     showMessageModal({
-      messageTitle: `${t("walletTransfer.submitFailed")}: ${(error as Error)?.message || t("walletSettings.somethingWrong")}`,
+      messageTitle: `${t("walletTransfer.submitFailed")}: ${
+        (error as Error)?.message || t("walletSettings.somethingWrong")
+      }`,
       messageStatus: STATUS.ERROR,
     });
   }
@@ -412,7 +544,9 @@ async function setTokenAmount(type = "max") {
       } else {
         amount = getTokenBalance();
       }
-      sendAmount.value = isCurrencyFiat.value ? convertCryptoToFiat(amount) : amount;
+      sendAmount.value = isCurrencyFiat.value
+        ? convertCryptoToFiat(amount)
+        : amount;
       break;
     case "reset":
       isSendAllActive.value = false;
@@ -474,23 +608,34 @@ function updateSelectedToken($event: Partial<SolAndSplToken>) {
 watch(
   transferTo,
   debounce(() => {
-    if (/\.sol$/g.test(transferTo.value)) transferType.value = { ...ALLOWED_VERIFIERS[1] };
+    if (/\.sol$/g.test(transferTo.value))
+      transferType.value = { ...ALLOWED_VERIFIERS[1] };
     else transferType.value = { ...ALLOWED_VERIFIERS[0] };
-    snsAddressPromise = addressPromise(transferType.value.value, transferTo.value);
+    snsAddressPromise = addressPromise(
+      transferType.value.value,
+      transferTo.value,
+    );
     transferToInternal.value = transferTo.value;
-  }, 500)
+  }, 500),
 );
 
 // reset transfer token to solana if tokens no longer has current token
 watch([tokens, nftTokens], () => {
-  if (![...tokens.value, ...nftTokens.value].some((token) => token?.mintAddress === selectedToken.value?.mintAddress)) {
+  if (
+    ![...tokens.value, ...nftTokens.value].some(
+      (token) => token?.mintAddress === selectedToken.value?.mintAddress,
+    )
+  ) {
     updateSelectedToken(tokens.value[0]);
   }
 });
 
 async function onSelectTransferType() {
   // refresh address in case transferType changed
-  snsAddressPromise = addressPromise(transferType.value.value, transferTo.value);
+  snsAddressPromise = addressPromise(
+    transferType.value.value,
+    transferTo.value,
+  );
   $v.value.$reset();
   $v.value.$touch();
 }
@@ -498,11 +643,17 @@ async function onSelectTransferType() {
 
 <template>
   <div class="py-2">
-    <div class="mt-5 flex flex-row justify-around items-start md:space-x-5 lt-md:flex-col-reverse lt-md:justify-start">
+    <div
+      class="mt-5 flex flex-row justify-around items-start md:space-x-5 lt-md:flex-col-reverse lt-md:justify-start"
+    >
       <Card class="w-full lt-md:mt-4">
         <form action="#" method="POST" class="w-full">
           <div class="flex flex-col justify-around items-start space-y-9">
-            <TransferTokenSelect :selected-token="selectedToken" class="w-full" @update:selected-token="updateSelectedToken($event)" />
+            <TransferTokenSelect
+              :selected-token="selectedToken"
+              class="w-full"
+              @update:selected-token="updateSelectedToken($event)"
+            />
             <div class="w-full flex flex-row space-x-2">
               <ComboBox
                 v-model="transferTo"
@@ -512,13 +663,27 @@ async function onSelectTransferType() {
                 class="w-2/3 flex-auto"
               />
               <div class="w-1/3 flex-auto mt-6">
-                <SelectField v-model="transferType" :items="transferTypes" @update:model-value="onSelectTransferType" />
+                <SelectField
+                  v-model="transferType"
+                  :items="transferTypes"
+                  @update:model-value="onSelectTransferType"
+                />
               </div>
             </div>
             <div v-if="isNewContact()" class="w-full">
-              <CheckBox class="mb-4" label="Save Contact" :checked="checked" label-position="right" @change="checked = !checked" />
+              <CheckBox
+                class="mb-4"
+                label="Save Contact"
+                :checked="checked"
+                label-position="right"
+                @change="checked = !checked"
+              />
               <div v-if="checked">
-                <TextField v-model="contactName" :errors="$v.contactName.$errors" :placeholder="$t('walletSettings.enterContact')" />
+                <TextField
+                  v-model="contactName"
+                  :errors="$v.contactName.$errors"
+                  :placeholder="$t('walletSettings.enterContact')"
+                />
               </div>
             </div>
 
@@ -527,15 +692,29 @@ async function onSelectTransferType() {
                 v-model="sendAmount"
                 :label="$t('dappTransfer.amount')"
                 :errors="$v.sendAmount.$errors"
-                :postfix-text="isSendAllActive ? $t('walletTransfer.reset') : $t('walletTransfer.sendAll')"
+                :postfix-text="
+                  isSendAllActive
+                    ? $t('walletTransfer.reset')
+                    : $t('walletTransfer.sendAll')
+                "
                 type="number"
-                @update:postfix-text-clicked="setTokenAmount(isSendAllActive ? 'reset' : 'max')"
+                @update:postfix-text-clicked="
+                  setTokenAmount(isSendAllActive ? 'reset' : 'max')
+                "
               >
-                <div v-if="hasGeckoPrice" class="flex flex-row items-center justify-around h-full select-none">
+                <div
+                  v-if="hasGeckoPrice"
+                  class="flex flex-row items-center justify-around h-full select-none"
+                >
                   <div
-                    v-ga="TransferPageInteractions.CURRENCY_TOGGLE + selectedToken.symbol"
+                    v-ga="
+                      TransferPageInteractions.CURRENCY_TOGGLE +
+                      selectedToken.symbol
+                    "
                     class="currency-selector mr-1"
-                    :class="[!isCurrencyFiat ? 't-btn-tertiary active-currency' : '']"
+                    :class="[
+                      !isCurrencyFiat ? 't-btn-tertiary active-currency' : '',
+                    ]"
                     @click="setAmountCurrency(false)"
                     @keydown="setAmountCurrency(false)"
                   >
@@ -544,7 +723,9 @@ async function onSelectTransferType() {
                   <div
                     v-ga="TransferPageInteractions.CURRENCY_TOGGLE + currency"
                     class="currency-selector"
-                    :class="[isCurrencyFiat ? 't-btn-tertiary active-currency' : '']"
+                    :class="[
+                      isCurrencyFiat ? 't-btn-tertiary active-currency' : '',
+                    ]"
                     @click="setAmountCurrency(true)"
                     @keydown="setAmountCurrency(true)"
                   >
@@ -554,9 +735,18 @@ async function onSelectTransferType() {
               </TextField>
             </div>
             <div v-if="spayMessage" class="w-full">
-              <TextField :label="$t('walletPay.message')" :disabled="true" :model-value="spayMessage"> </TextField>
+              <TextField
+                :label="$t('walletPay.message')"
+                :disabled="true"
+                :model-value="spayMessage"
+              >
+              </TextField>
             </div>
-            <Button class="ml-auto" :disabled="$v.$dirty && $v.$invalid" @click="openModal">
+            <Button
+              class="ml-auto"
+              :disabled="$v.$dirty && $v.$invalid"
+              @click="openModal"
+            >
               {{ $t("dappTransfer.transfer") }}
             </Button>
           </div>
@@ -574,7 +764,9 @@ async function onSelectTransferType() {
     <AsyncTransferConfirm
       :sender-pub-key="ControllerModule.selectedAddress"
       :receiver-pub-key="resolvedAddress"
-      :crypto-amount="isCurrencyFiat ? convertFiatToCrypto(sendAmount) : sendAmount"
+      :crypto-amount="
+        isCurrencyFiat ? convertFiatToCrypto(sendAmount) : sendAmount
+      "
       :receiver-verifier="selectedVerifier"
       :receiver-verifier-id="resolvedAddress"
       :token-symbol="selectedToken?.data?.symbol || 'SOL'"

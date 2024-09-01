@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin-utils";
+import {
+  LOGIN_PROVIDER,
+  LOGIN_PROVIDER_TYPE,
+} from "@toruslabs/openlogin-utils";
 import { Loader } from "@toruslabs/vue-components/common";
 import { useVuelidate } from "@vuelidate/core";
 import { email, required } from "@vuelidate/validators";
@@ -24,9 +27,13 @@ import { isWhiteLabelDark } from "@/utils/whitelabel";
 import { Button } from "../components/common";
 import TextField from "../components/common/TextField.vue";
 import ControllerModule from "../modules/controllers";
-import { redirectToResult, useRedirectFlow } from "../utils/redirectflowHelpers";
+import {
+  redirectToResult,
+  useRedirectFlow,
+} from "../utils/redirectflowHelpers";
 
-const { isRedirectFlow, method, jsonrpc, req_id, resolveRoute } = useRedirectFlow();
+const { isRedirectFlow, method, jsonrpc, req_id, resolveRoute } =
+  useRedirectFlow();
 
 const socialLoginOptions = [
   {
@@ -64,8 +71,15 @@ const socialLoginOptions = [
   },
 ];
 
-const listOfChains = ref<{ value: string; label: string; img?: string; link?: string }[]>([
-  { label: "Solana", value: "Solana", img: "icon-solana.svg", link: AVAILABLE_WEBSITES.Solana },
+const listOfChains = ref<
+  { value: string; label: string; img?: string; link?: string }[]
+>([
+  {
+    label: "Solana",
+    value: "Solana",
+    img: "icon-solana.svg",
+    link: AVAILABLE_WEBSITES.Solana,
+  },
 ]);
 const selectedChain = ref(listOfChains.value[0]);
 
@@ -81,7 +95,9 @@ const rules = computed(() => {
 });
 const $v = useVuelidate(rules, { userEmail });
 
-const hasSelectedPrivateKey = computed(() => ControllerModule.hasSelectedPrivateKey);
+const hasSelectedPrivateKey = computed(
+  () => ControllerModule.hasSelectedPrivateKey,
+);
 const selectedAddress = computed(() => ControllerModule.selectedAddress);
 
 const finalIsLoading = computed(() => {
@@ -91,12 +107,22 @@ const finalIsLoading = computed(() => {
 onMounted(() => {
   log.info("app is dark mode", app);
   if (hasSelectedPrivateKey.value && isRedirectFlow) {
-    redirectToResult(jsonrpc, { success: true, data: { selectedAddress: selectedAddress.value }, method }, req_id, resolveRoute);
+    redirectToResult(
+      jsonrpc,
+      {
+        success: true,
+        data: { selectedAddress: selectedAddress.value },
+        method,
+      },
+      req_id,
+      resolveRoute,
+    );
   }
 });
 
 watch(hasSelectedPrivateKey, () => {
-  if (hasSelectedPrivateKey.value && !isRedirectFlow) router.push("/wallet/home");
+  if (hasSelectedPrivateKey.value && !isRedirectFlow)
+    router.push("/wallet/home");
 });
 
 const saveLoginStateToWindow = (value: boolean): void => {
@@ -104,7 +130,10 @@ const saveLoginStateToWindow = (value: boolean): void => {
     window.loginInProgress = value;
   }
 };
-const onLogin = async (loginProvider: LOGIN_PROVIDER_TYPE, emailString?: string) => {
+const onLogin = async (
+  loginProvider: LOGIN_PROVIDER_TYPE,
+  emailString?: string,
+) => {
   try {
     isLoading.value = true;
     saveLoginStateToWindow(isLoading.value);
@@ -113,10 +142,24 @@ const onLogin = async (loginProvider: LOGIN_PROVIDER_TYPE, emailString?: string)
       login_hint: emailString,
       waitSaving: isRedirectFlow,
     });
-    const redirect = new URLSearchParams(window.location.search).get("redirectTo"); // set by the router
-    if (redirect) router.push(`${redirect}?resolveRoute=${resolveRoute}${window.location.hash}`);
+    const redirect = new URLSearchParams(window.location.search).get(
+      "redirectTo",
+    ); // set by the router
+    if (redirect)
+      router.push(
+        `${redirect}?resolveRoute=${resolveRoute}${window.location.hash}`,
+      );
     else if (isRedirectFlow) {
-      redirectToResult(jsonrpc, { success: true, data: { selectedAddress: selectedAddress.value }, method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        {
+          success: true,
+          data: { selectedAddress: selectedAddress.value },
+          method,
+        },
+        req_id,
+        resolveRoute,
+      );
     } else if (selectedAddress.value) {
       isLoading.value = false;
       router.push("/wallet/home");
@@ -124,7 +167,12 @@ const onLogin = async (loginProvider: LOGIN_PROVIDER_TYPE, emailString?: string)
   } catch (error) {
     log.error(error);
     if (isRedirectFlow) {
-      redirectToResult(jsonrpc, { success: false, method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { success: false, method },
+        req_id,
+        resolveRoute,
+      );
     }
     addToast({
       message: t("login.loginError"),
@@ -147,30 +195,60 @@ watch(
   selectedChain,
   throttle(() => {
     window.location.href = selectedChain.value.link || "";
-  }, 500)
+  }, 500),
 );
 </script>
 
 <template>
-  <div class="height-full bg-white dark:bg-app-loginBg grid grid-cols-6 py-3" :class="[isLoading ? 'overflow-hidden' : '']">
-    <div class="grid grid-cols-12 col-span-6 md:col-span-4 lg:col-span-3 2xl:col-span-2 2xl:col-start-2 h-full md:h-auto">
-      <div class="col-end-12 col-span-10 lg:col-end-13 lg:col-span-9 xl:col-end-12 xl:col-span-8 2xl:col-end-10 2xl:col-span-9 md:m-auto">
-        <div class="grid grid-cols-12 md-h-screen md:h-auto login-container md:bg-[#1f2a37]">
-          <div class="col-start-2 col-span-10 mb-32 md:col-start-3 md:col-span-8 md:mb-[10%] md:mt-[10%]">
+  <div
+    class="height-full bg-white dark:bg-app-loginBg grid grid-cols-6 py-3"
+    :class="[isLoading ? 'overflow-hidden' : '']"
+  >
+    <div
+      class="grid grid-cols-12 col-span-6 md:col-span-4 lg:col-span-3 2xl:col-span-2 2xl:col-start-2 h-full md:h-auto"
+    >
+      <div
+        class="col-end-12 col-span-10 lg:col-end-13 lg:col-span-9 xl:col-end-12 xl:col-span-8 2xl:col-end-10 2xl:col-span-9 md:m-auto"
+      >
+        <div
+          class="grid grid-cols-12 md-h-screen md:h-auto login-container md:bg-[#1f2a37]"
+        >
+          <div
+            class="col-start-2 col-span-10 mb-32 md:col-start-3 md:col-span-8 md:mb-[10%] md:mt-[10%]"
+          >
             <img
               height="1.5rem"
               width="auto"
               class="block h-6 w-auto my-7"
-              :src="require(`../assets/torus-logo-${app.isDarkMode ? 'white' : 'blue'}.png`)"
+              :src="
+                require(
+                  `../assets/torus-logo-${
+                    app.isDarkMode ? 'white' : 'blue'
+                  }.png`,
+                )
+              "
               alt="Torus Logo"
             />
-            <div class="font-header text-app-text-500 dark:text-app-text-dark-500 text-2xl ml-auto mr-auto flex">
+            <div
+              class="font-header text-app-text-500 dark:text-app-text-dark-500 text-2xl ml-auto mr-auto flex"
+            >
               <span class="mr-1.5"> Your </span>
-              <LoginDropDown v-model="selectedChain" size="small" :items="listOfChains" />
+              <LoginDropDown
+                v-model="selectedChain"
+                size="small"
+                :items="listOfChains"
+              />
             </div>
-            <div class="font-header text-app-text-500 dark:text-app-text-dark-500 text-xl md:mb-4 mb-8 ml-auto mr-auto">wallet in one click</div>
+            <div
+              class="font-header text-app-text-500 dark:text-app-text-dark-500 text-xl md:mb-4 mb-8 ml-auto mr-auto"
+            >
+              wallet in one click
+            </div>
             <div class="grid grid-cols-3 gap-2 w-full mx-auto">
-              <template v-for="loginButton in socialLoginOptions" :key="loginButton.loginType">
+              <template
+                v-for="loginButton in socialLoginOptions"
+                :key="loginButton.loginType"
+              >
                 <div :class="loginButton.divClass || `col-span-1`">
                   <Button
                     size="large"
@@ -187,18 +265,28 @@ watch(
                       :alt="loginButton.imgAltText"
                     />
                     <template v-if="loginButton.buttonLoginText">
-                      {{ $t(loginButton.translateLoginText, { verifier: loginButton.verifier }) }}
+                      {{
+                        $t(loginButton.translateLoginText, {
+                          verifier: loginButton.verifier,
+                        })
+                      }}
                     </template>
                   </Button>
                 </div>
               </template>
             </div>
             <div class="mt-3 relative w-full">
-              <div class="absolute inset-0 flex items-center" aria-hidden="true">
+              <div
+                class="absolute inset-0 flex items-center"
+                aria-hidden="true"
+              >
                 <div class="w-full border-t border-app-text-400"></div>
               </div>
               <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-app-gray-800 text-app-text-500 dark:text-app-text-dark-600">or</span>
+                <span
+                  class="px-2 bg-white dark:bg-app-gray-800 text-app-text-500 dark:text-app-text-dark-600"
+                  >or</span
+                >
               </div>
             </div>
             <div class="mt-3 w-full">
@@ -216,7 +304,11 @@ watch(
                   :block="true"
                   type="submit"
                   class="w-full mt-2 dark:text-app-gray-400 dark:bg-app-loginBg"
-                  >{{ $t("dappLogin.continue", { verifier: $t("loginCountry.email") }) }}
+                  >{{
+                    $t("dappLogin.continue", {
+                      verifier: $t("loginCountry.email"),
+                    })
+                  }}
                 </Button>
               </form>
             </div>
@@ -227,19 +319,30 @@ watch(
         </div>
       </div>
     </div>
-    <div class="col-span-6 md:col-span-2 lg:col-span-3 xl:col-span-2 h-full flex items-center">
+    <div
+      class="col-span-6 md:col-span-2 lg:col-span-3 xl:col-span-2 h-full flex items-center"
+    >
       <div class="grid grid-cols-8 w-full">
-        <div class="col-span-6 col-start-2 w-full mx-auto text-center text-app-text-500 dark:text-app-text-dark-500">
+        <div
+          class="col-span-6 col-start-2 w-full mx-auto text-center text-app-text-500 dark:text-app-text-dark-500"
+        >
           <LoginSlider />
         </div>
       </div>
     </div>
-    <div class="flex md:hidden flex-col col-span-6 md:col-span-2 lg:col-span-3 h-full justify-center mx-10 items-center">
+    <div
+      class="flex md:hidden flex-col col-span-6 md:col-span-2 lg:col-span-3 h-full justify-center mx-10 items-center"
+    >
       <LoginFooter />
     </div>
-    <div v-if="finalIsLoading" class="flex justify-center items-center fixed bg-white dark:bg-app-gray-800 inset-0 h-full w-full z-10">
+    <div
+      v-if="finalIsLoading"
+      class="flex justify-center items-center fixed bg-white dark:bg-app-gray-800 inset-0 h-full w-full z-10"
+    >
       <Loader :use-spinner="true" :is-dark="isWhiteLabelDark()" />
-      <p class="absolute bottom-12 text-white text-center">{{ $t("dappLogin.completeVerification") }}.</p>
+      <p class="absolute bottom-12 text-white text-center">
+        {{ $t("dappLogin.completeVerification") }}.
+      </p>
     </div>
   </div>
 </template>

@@ -7,7 +7,13 @@ import { LockIcon } from "@toruslabs/vue-icons/security";
 import { computed } from "vue";
 
 import { Panel } from "@/components/common";
-import { AccountDetails, AddressBook, CrashReporting, Display, Network } from "@/components/settings";
+import {
+  AccountDetails,
+  AddressBook,
+  CrashReporting,
+  Display,
+  Network,
+} from "@/components/settings";
 import Language from "@/components/settings/Language.vue";
 import ControllerModule from "@/modules/controllers";
 
@@ -29,19 +35,32 @@ const deleteContact = async (contactId: number): Promise<void> => {
         <div class="mb-4">
           <Panel :title="$t('walletSettings.privacySecurity')" disabled>
             <AccountDetails />
-            <template #leftIcon><LockIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <template #leftIcon
+              ><LockIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
         <div class="mb-4">
           <Panel :title="$t('walletSettings.addressBook')" disabled>
-            <AddressBook :state-contacts="contacts" @save-contact="saveContact" @delete-contact="deleteContact" />
-            <template #leftIcon><ListIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <AddressBook
+              :state-contacts="contacts"
+              @save-contact="saveContact"
+              @delete-contact="deleteContact"
+            />
+            <template #leftIcon
+              ><ListIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
         <div class="mb-4">
           <Panel :title="$t('walletSettings.crashReport')" disabled>
             <CrashReporting />
-            <template #leftIcon><MonitorIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <template #leftIcon
+              ><MonitorIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
       </div>
@@ -49,19 +68,28 @@ const deleteContact = async (contactId: number): Promise<void> => {
         <div class="mb-4">
           <Panel :title="$t('walletSettings.network')" disabled>
             <Network />
-            <template #leftIcon><GlobeIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <template #leftIcon
+              ><GlobeIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
         <div class="mb-4">
           <Panel :title="$t('walletSettings.display')" disabled>
             <Display />
-            <template #leftIcon><OptionsIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <template #leftIcon
+              ><OptionsIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
         <div class="mb-4">
           <Panel :title="$t('walletSettings.language')" disabled>
             <Language />
-            <template #leftIcon><TranslateIcon class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500" /></template>
+            <template #leftIcon
+              ><TranslateIcon
+                class="w-5 h-5 mr-2 text-app-text-600 dark:text-app-text-dark-500"
+            /></template>
           </Panel>
         </div>
       </div>

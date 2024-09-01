@@ -11,7 +11,13 @@ import OpenLoginFactory from "@/auth/OpenLogin";
 import { PopupLoader, PopupLogin, PopupWidget } from "@/components/frame";
 import { i18n, setLocale } from "@/plugins/i18nPlugin";
 import { BUTTON_POSITION, EmbedInitParams } from "@/utils/enums";
-import { hideCrispButton, isCrispClosed, isMain, promiseCreator, recordDapp } from "@/utils/helpers";
+import {
+  hideCrispButton,
+  isCrispClosed,
+  isMain,
+  promiseCreator,
+  recordDapp,
+} from "@/utils/helpers";
 import { setWhiteLabel } from "@/utils/whitelabel";
 
 import ControllerModule, { torus } from "../modules/controllers";
@@ -21,7 +27,9 @@ const { resolve, promise } = promiseCreator<void>();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).$crisp.push(["do", "chat:hide"]);
-let dappOrigin = window.location.ancestorOrigins ? window.location.ancestorOrigins[0] : "";
+let dappOrigin = window.location.ancestorOrigins
+  ? window.location.ancestorOrigins[0]
+  : "";
 
 const initParams = {
   buttonPosition: BUTTON_POSITION.BOTTOM_LEFT,
@@ -53,12 +61,25 @@ function startLogin() {
         if (!dappOrigin) {
           dappOrigin = origin;
         }
-        const { buttonPosition, apiKey, network, dappMetadata, extraParams, whiteLabel } = data;
+        const {
+          buttonPosition,
+          apiKey,
+          network,
+          dappMetadata,
+          extraParams,
+          whiteLabel,
+        } = data;
         setWhiteLabel(whiteLabel);
         setLocale(i18n, whiteLabel?.defaultLanguage || "en");
         if (typeof network === "string") {
-          if (network === "mainnet-beta") initParams.network = WALLET_SUPPORTED_NETWORKS.mainnet;
-          else if (network === "mainnet" || network === "testnet" || network === "devnet") initParams.network = WALLET_SUPPORTED_NETWORKS[network];
+          if (network === "mainnet-beta")
+            initParams.network = WALLET_SUPPORTED_NETWORKS.mainnet;
+          else if (
+            network === "mainnet" ||
+            network === "testnet" ||
+            network === "devnet"
+          )
+            initParams.network = WALLET_SUPPORTED_NETWORKS[network];
         } else {
           initParams.network = network;
           initParams.isCustomNetwork = true;
@@ -78,10 +99,18 @@ function startLogin() {
 startLogin();
 
 const isLoggedIn = computed(() => !!ControllerModule.hasSelectedPrivateKey);
-const isEmbedLoginInProgress = computed(() => ControllerModule.torusState.EmbedControllerState.loginInProgress);
-const oauthModalVisibility = computed(() => ControllerModule.torusState.EmbedControllerState.oauthModalVisibility);
-const isIFrameFullScreen = computed(() => ControllerModule.torusState.EmbedControllerState.isIFrameFullScreen);
-const allTransactions = computed(() => ControllerModule.selectedNetworkTransactions);
+const isEmbedLoginInProgress = computed(
+  () => ControllerModule.torusState.EmbedControllerState.loginInProgress,
+);
+const oauthModalVisibility = computed(
+  () => ControllerModule.torusState.EmbedControllerState.oauthModalVisibility,
+);
+const isIFrameFullScreen = computed(
+  () => ControllerModule.torusState.EmbedControllerState.isIFrameFullScreen,
+);
+const allTransactions = computed(
+  () => ControllerModule.selectedNetworkTransactions,
+);
 const lastTransaction = computed(() => {
   const txns = allTransactions.value;
   // txns.sort((x, y) => {
@@ -127,14 +156,18 @@ onMounted(async () => {
     const openloginInstance = await OpenLoginFactory.getInstance(true);
     if (openloginInstance.ed25519PrivKey) {
       const address = await torus.addAccount(
-        base58.encode(Keypair.fromSecretKey(Buffer.from(openloginInstance.ed25519PrivKey, "hex")).secretKey),
+        base58.encode(
+          Keypair.fromSecretKey(
+            Buffer.from(openloginInstance.ed25519PrivKey, "hex"),
+          ).secretKey,
+        ),
         {
           email: "",
           name: "",
           profileImage: "",
           ...openloginInstance.getUserInfo(),
         },
-        true
+        true,
       );
       torus.setSelectedAccount(address);
     }
@@ -144,7 +177,10 @@ onMounted(async () => {
     hideCrispButton();
   }
 });
-const onLogin = async (loginProvider: LOGIN_PROVIDER_TYPE, userEmail?: string) => {
+const onLogin = async (
+  loginProvider: LOGIN_PROVIDER_TYPE,
+  userEmail?: string,
+) => {
   try {
     torus.embededOAuthLoginInProgress();
     await ControllerModule.triggerLogin({
@@ -170,7 +206,12 @@ const closePanel = () => {
 <template>
   <div class="min-h-screen flex justify-center items-center">
     <PopupLoader v-if="isEmbedLoginInProgress" />
-    <PopupLogin :is-open="oauthModalVisibility" :other-wallets="initParams.extraParams?.otherWallets" @on-close="cancelLogin" @on-login="onLogin" />
+    <PopupLogin
+      :is-open="oauthModalVisibility"
+      :other-wallets="initParams.extraParams?.otherWallets"
+      @on-close="cancelLogin"
+      @on-login="onLogin"
+    />
     <!-- remove the isEmbedLoginInProgress in v-if, if want to show loading button on the bottom left -->
     <PopupWidget
       v-if="!oauthModalVisibility && !isEmbedLoginInProgress"

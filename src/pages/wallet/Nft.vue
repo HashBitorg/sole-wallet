@@ -2,14 +2,25 @@
 import { ChevronLeftIcon, GlobeAltIcon } from "@heroicons/vue/outline";
 import { DotsHorizontalIcon } from "@heroicons/vue/solid";
 import { NFTInfo, SolanaToken } from "@toruslabs/solana-controllers";
-import { computed, defineAsyncComponent, onMounted, reactive, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { VueI18nTranslation } from "vue-i18n";
 import { useRouter } from "vue-router";
 
 import FallbackNft from "@/assets/fallback-nft.svg";
 import PaperAirplane from "@/assets/paper-airplane.svg";
 import BurnNFT from "@/components/burnNFT/BurnNFT.vue";
-import { NftsPageInteractions, trackUserClick, TransferPageInteractions } from "@/directives/google-analytics";
+import {
+  NftsPageInteractions,
+  trackUserClick,
+  TransferPageInteractions,
+} from "@/directives/google-analytics";
 import ControllerModule, { torus } from "@/modules/controllers";
 import { i18n } from "@/plugins/i18nPlugin";
 import { STATUS, STATUS_TYPE } from "@/utils/enums";
@@ -25,7 +36,10 @@ const isOpen = ref(false);
 const transferDisabled = ref(false);
 
 const AsyncMessageModal = defineAsyncComponent({
-  loader: () => import(/* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/common/MessageModal.vue"),
+  loader: () =>
+    import(
+      /* webpackPrefetch: true */ /* webpackChunkName: "MessageModal" */ "@/components/common/MessageModal.vue"
+    ),
 });
 
 const messageModalState = reactive({
@@ -45,7 +59,9 @@ const edition = ref<string | undefined>("");
 const isLoading = ref<boolean>(true);
 onMounted(async () => {
   mint.value = router.currentRoute.value.params.mint_address as string;
-  const tokenInState = nfts.value.find((nft: SolanaToken) => nft.mintAddress === mint.value);
+  const tokenInState = nfts.value.find(
+    (nft: SolanaToken) => nft.mintAddress === mint.value,
+  );
   if (tokenInState) {
     nftMetaData.value = tokenInState.metaplexData;
   } else {
@@ -102,7 +118,11 @@ const closeModal = () => {
   trackUserClick(TransferPageInteractions.CANCEL);
 };
 
-const showMessageModal = (params: { messageTitle: string; messageDescription?: string; messageStatus: STATUS_TYPE }) => {
+const showMessageModal = (params: {
+  messageTitle: string;
+  messageDescription?: string;
+  messageStatus: STATUS_TYPE;
+}) => {
   const { messageDescription, messageTitle, messageStatus } = params;
   messageModalState.messageDescription = messageDescription || "";
   messageModalState.messageTitle = messageTitle;
@@ -122,7 +142,9 @@ const confirmTransfer = async () => {
     });
   } catch (error) {
     showMessageModal({
-      messageTitle: `Burn Failed: ${(error as Error)?.message || t("walletSettings.somethingWrong")}`,
+      messageTitle: `Burn Failed: ${
+        (error as Error)?.message || t("walletSettings.somethingWrong")
+      }`,
       messageStatus: STATUS.ERROR,
     });
   }
@@ -132,14 +154,20 @@ const confirmTransfer = async () => {
 <template>
   <div class="height-full flex flex-col bg-white dark:bg-app-gray-800">
     <main v-if="nftMetaData" class="flex-1 relative">
-      <div class="h-[380px] w-full absolute top-0 left-0 flex justify-center items-center overflow-hidden">
+      <div
+        class="h-[380px] w-full absolute top-0 left-0 flex justify-center items-center overflow-hidden"
+      >
         <img
           alt="NFT"
-          :src="getImgProxyUrl(nftMetaData.offChainMetaData?.image) || FallbackNft"
+          :src="
+            getImgProxyUrl(nftMetaData.offChainMetaData?.image) || FallbackNft
+          "
           class="object-cover w-full h-full"
           @error="setFallbackImg($event.target, FallbackNft)"
         />
-        <div class="h-full w-full bg-gray-800 backdrop-blur-lg bg-opacity-30 absolute top-0 left-0"></div>
+        <div
+          class="h-full w-full bg-gray-800 backdrop-blur-lg bg-opacity-30 absolute top-0 left-0"
+        ></div>
       </div>
       <!-- content -->
       <div
@@ -147,13 +175,25 @@ const confirmTransfer = async () => {
       >
         <div class="flex flex-col relative">
           <div class="flex justify-between px-2 py-4 w-full">
-            <div class="cursor-pointer flex items-center" @click="goBack" @keydown="goBack">
+            <div
+              class="cursor-pointer flex items-center"
+              @click="goBack"
+              @keydown="goBack"
+            >
               <ChevronLeftIcon class="text-app-text-dark-400 h-4 w-4 mr-2" />
-              <span class="text-app-text-dark-400 text-base font-light">Back</span>
+              <span class="text-app-text-dark-400 text-base font-light"
+                >Back</span
+              >
             </div>
-            <DotsHorizontalIcon class="h-6 w-6 text-app-text-dark-400 cursor-pointer" @click="changeDropdown" />
+            <DotsHorizontalIcon
+              class="h-6 w-6 text-app-text-dark-400 cursor-pointer"
+              @click="changeDropdown"
+            />
           </div>
-          <div v-if="showDropDown" class="ml-auto w-1/3 absolute right-0 top-5 mt-6">
+          <div
+            v-if="showDropDown"
+            class="ml-auto w-1/3 absolute right-0 top-5 mt-6"
+          >
             <div
               class="rounded-md py-2 flex justify-center items-center bg-white dark:bg-app-gray-800 dark:shadow-none text-app-text-600 dark:text-app-text-dark-white cursor-pointer mb-2"
               @click="openModal"
@@ -164,31 +204,48 @@ const confirmTransfer = async () => {
           </div>
           <img
             alt="nft"
-            :src="getImgProxyUrl(nftMetaData.offChainMetaData?.image) || FallbackNft"
+            :src="
+              getImgProxyUrl(nftMetaData.offChainMetaData?.image) || FallbackNft
+            "
             class="h-[480px] w-[480px] object-cover overflow-hidden rounded-lg shadow-lg"
             @error="setFallbackImg($event.target, FallbackNft)"
           />
         </div>
-        <div class="flex flex-col pt-4 md:pt-14 w-full md:w-[320px] ml-0 md:ml-10 pb-8">
+        <div
+          class="flex flex-col pt-4 md:pt-14 w-full md:w-[320px] ml-0 md:ml-10 pb-8"
+        >
           <div class="w-full flex flex-col">
-            <div v-if="nftMetaData.offChainMetaData?.collection" class="flex items-center">
+            <div
+              v-if="nftMetaData.offChainMetaData?.collection"
+              class="flex items-center"
+            >
               <img
                 alt="collection"
-                :src="getImgProxyUrl(nftMetaData.offChainMetaData?.image) || FallbackNft"
+                :src="
+                  getImgProxyUrl(nftMetaData.offChainMetaData?.image) ||
+                  FallbackNft
+                "
                 class="h-5 w-5 object-cover rounded-full overflow-hidden mr-1"
                 @error="setFallbackImg($event.target, FallbackNft)"
               />
-              <span class="text-app-gray-500 md:text-app-text-dark-400 dark:text-app-text-dark-400 text-sm">{{
-                nftMetaData.offChainMetaData?.collection?.name || ""
-              }}</span>
+              <span
+                class="text-app-gray-500 md:text-app-text-dark-400 dark:text-app-text-dark-400 text-sm"
+                >{{
+                  nftMetaData.offChainMetaData?.collection?.name || ""
+                }}</span
+              >
             </div>
             <h1
               class="text-app-gray-700 md:text-app-text-dark-400 dark:text-app-text-dark-400 text-[26px] font-bold mt-2 truncate"
-              :class="nftMetaData.offChainMetaData?.collection ? 'md:mt-2' : 'md:mt-6'"
+              :class="
+                nftMetaData.offChainMetaData?.collection ? 'md:mt-2' : 'md:mt-6'
+              "
             >
               {{ nftMetaData.offChainMetaData?.name || "" }}
             </h1>
-            <p class="text-app-gray-600 md:text-app-text-dark-400 dark:text-app-text-dark-400 mt-4 text-sm h-20 truncate-multiline">
+            <p
+              class="text-app-gray-600 md:text-app-text-dark-400 dark:text-app-text-dark-400 mt-4 text-sm h-20 truncate-multiline"
+            >
               {{ nftMetaData.offChainMetaData?.description || "" }}
             </p>
             <div
@@ -196,8 +253,15 @@ const confirmTransfer = async () => {
               @click="transferNFT"
               @keydown="transferNFT"
             >
-              <img alt="paper airplane" :src="PaperAirplane" class="mr-1 invert md:invert-0 dark:invert-0" />
-              <span class="text-app-text-dark-400 md:text-black dark:text-black text-sm">Send</span>
+              <img
+                alt="paper airplane"
+                :src="PaperAirplane"
+                class="mr-1 invert md:invert-0 dark:invert-0"
+              />
+              <span
+                class="text-app-text-dark-400 md:text-black dark:text-black text-sm"
+                >Send</span
+              >
             </div>
             <div
               class="rounded-full py-2 px-3 w-fit flex justify-center items-center bg-app-gray-800 bg-opacity-80 md:bg-opacity-20 md:bg-white dark:bg-white dark:bg-opacity-20 mt-3 cursor-pointer"
@@ -205,7 +269,9 @@ const confirmTransfer = async () => {
               @keydown="viewNFT"
             >
               <GlobeAltIcon class="h-3 w-3 text-app-text-dark-400 mr-1" />
-              <span class="text-app-text-dark-400 text-xs">View on Solscan</span>
+              <span class="text-app-text-dark-400 text-xs"
+                >View on Solscan</span
+              >
             </div>
           </div>
           <div class="w-full flex flex-col mt-7">
@@ -213,15 +279,28 @@ const confirmTransfer = async () => {
               <span class="text-app-gray-500 text-base">Edition</span>
               <span class="text-app-text-dark-400 text-xl">#{{ edition }}</span>
             </div>
-            <span v-if="(nftMetaData.offChainMetaData?.attributes?.length || 0) > 0" class="text-app-gray-500 text-base mb-2">Properties</span>
-            <div v-if="(nftMetaData.offChainMetaData?.attributes?.length || 0) > 0" class="grid grid-cols-3 -ml-1">
+            <span
+              v-if="(nftMetaData.offChainMetaData?.attributes?.length || 0) > 0"
+              class="text-app-gray-500 text-base mb-2"
+              >Properties</span
+            >
+            <div
+              v-if="(nftMetaData.offChainMetaData?.attributes?.length || 0) > 0"
+              class="grid grid-cols-3 -ml-1"
+            >
               <div
                 v-for="(value, idx) in nftMetaData.offChainMetaData?.attributes"
                 :key="idx"
                 class="flex flex-col space-y-1 border-t-2 border-t-[#505154] m-1"
               >
-                <span class="text-app-gray-700 dark:text-app-gray-500 text-xs truncate">{{ value?.trait_type || "" }}</span>
-                <span class="text-app-gray-500 dark:text-app-text-dark-500 text-xs truncate">{{ value?.value || "" }}</span>
+                <span
+                  class="text-app-gray-700 dark:text-app-gray-500 text-xs truncate"
+                  >{{ value?.trait_type || "" }}</span
+                >
+                <span
+                  class="text-app-gray-500 dark:text-app-text-dark-500 text-xs truncate"
+                  >{{ value?.value || "" }}</span
+                >
               </div>
             </div>
           </div>
@@ -229,9 +308,20 @@ const confirmTransfer = async () => {
       </div>
     </main>
     <main v-else class="flex-1 relative p-8">
-      <div class="w-full px-4 py-8 bg-app-gray-700 rounded-lg flex flex-col items-center space-y-2">
-        <span class="text-app-text-dark-500 text-base text-center w-full inline-block">{{ isLoading ? "Loading..." : "Invalid Mint Address" }}</span>
-        <div class="px-4 py-2 bg-app-primary-500 text-app-text-dark-400 rounded-md cursor-pointer" @click="goBack" @keydown="goBack">Back</div>
+      <div
+        class="w-full px-4 py-8 bg-app-gray-700 rounded-lg flex flex-col items-center space-y-2"
+      >
+        <span
+          class="text-app-text-dark-500 text-base text-center w-full inline-block"
+          >{{ isLoading ? "Loading..." : "Invalid Mint Address" }}</span
+        >
+        <div
+          class="px-4 py-2 bg-app-primary-500 text-app-text-dark-400 rounded-md cursor-pointer"
+          @click="goBack"
+          @keydown="goBack"
+        >
+          Back
+        </div>
       </div>
     </main>
     <div
@@ -247,17 +337,31 @@ const confirmTransfer = async () => {
       >
         <div
           class="flex flex-col h-full items-center justify-center select-none w-16 py-1"
-          :class="[key === 'nfts' ? 'active-border border-app-primary-500' : '']"
+          :class="[
+            key === 'nfts' ? 'active-border border-app-primary-500' : '',
+          ]"
         >
           <img
             :src="value.icon"
             alt="link icon"
             class="h-5"
-            :class="[key === 'nfts' ? (ControllerModule.isDarkMode ? 'item-white' : 'item-black') : 'item-gray opacity-90']"
+            :class="[
+              key === 'nfts'
+                ? ControllerModule.isDarkMode
+                  ? 'item-white'
+                  : 'item-black'
+                : 'item-gray opacity-90',
+            ]"
           />
           <p
             class="text-xs text-center leading-none mt-1"
-            :class="[key === 'nfts' ? (ControllerModule.isDarkMode ? 'item-white' : 'item-black') : 'item-gray opacity-90']"
+            :class="[
+              key === 'nfts'
+                ? ControllerModule.isDarkMode
+                  ? 'item-white'
+                  : 'item-black'
+                : 'item-gray opacity-90',
+            ]"
           >
             {{ t(value.name) || "" }}
           </p>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Keypair } from "@solana/web3.js";
-import { broadcastChannelOptions, PopupData } from "@toruslabs/base-controllers";
+import {
+  broadcastChannelOptions,
+  PopupData,
+} from "@toruslabs/base-controllers";
 import { BroadcastChannel } from "@toruslabs/broadcast-channel";
 import { get } from "@toruslabs/http-helpers";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
@@ -17,7 +20,11 @@ import config from "@/config";
 import { generateTorusAuthHeaders, openCrispChat } from "@/utils/helpers";
 
 import OpenLoginFactory from "../auth/OpenLogin";
-import { APPLE, OpenLoginPopupResponse, ProjectAccountType } from "../utils/enums";
+import {
+  APPLE,
+  OpenLoginPopupResponse,
+  ProjectAccountType,
+} from "../utils/enums";
 
 const { t } = useI18n();
 
@@ -91,7 +98,13 @@ async function endLogin() {
     if (!openLoginStore?.appState) {
       throw new Error("Login unsuccessful");
     }
-    const appState = JSON.parse(safeatob(decodeURIComponent(decodeURIComponent(openLoginStore.appState as string))));
+    const appState = JSON.parse(
+      safeatob(
+        decodeURIComponent(
+          decodeURIComponent(openLoginStore.appState as string),
+        ),
+      ),
+    );
     const { instanceId } = appState;
     channel = instanceId;
 
@@ -99,8 +112,11 @@ async function endLogin() {
     // const { sk: secretKey } = getED25519Key(privKey.padStart(64, "0"));
     const secretKey = Buffer.from(ed25519PrivKey!, "hex");
 
-    const typeOfLoginDisplay = userInfo.typeOfLogin.charAt(0).toUpperCase() + userInfo.typeOfLogin.slice(1);
-    const accountDisplay = (userInfo.typeOfLogin !== APPLE && userInfo.email) || userInfo.name;
+    const typeOfLoginDisplay =
+      userInfo.typeOfLogin.charAt(0).toUpperCase() +
+      userInfo.typeOfLogin.slice(1);
+    const accountDisplay =
+      (userInfo.typeOfLogin !== APPLE && userInfo.email) || userInfo.name;
     const mainKeyPair = Keypair.fromSecretKey(secretKey);
     accounts.push({
       app: `${typeOfLoginDisplay} ${accountDisplay}`,
@@ -114,7 +130,8 @@ async function endLogin() {
     const userDapps: Record<string, string> = {};
 
     let matchedDappHost = -1;
-    const dappOrigin = sessionStorage.getItem("dappOrigin") || window.location.origin;
+    const dappOrigin =
+      sessionStorage.getItem("dappOrigin") || window.location.origin;
     const dappHost = new URL(dappOrigin || "");
 
     if (tKey && oAuthPrivateKey) {
@@ -123,21 +140,35 @@ async function endLogin() {
 
         const headers = generateTorusAuthHeaders(oAuthPrivateKey);
         log.info(headers, "headers");
-        const response = await get<{ user_projects: [{ last_login: string; project_id: string; hostname: string; name: string }] }>(
+        const response = await get<{
+          user_projects: [
+            {
+              last_login: string;
+              project_id: string;
+              hostname: string;
+              name: string;
+            },
+          ];
+        }>(
           `${config.developerDashboardUrl}/projects/user-projects?chain_namespace=solana`,
           {
             headers,
-          }
+          },
         );
         log.info(response, "User projects from developer dashboard");
         const userProjects = response.user_projects ?? [];
         userProjects.sort((a, b) => (a.last_login < b.last_login ? 1 : -1));
         userProjects.forEach((project, idx) => {
-          const subKey = subkey(tKey, Buffer.from(project.project_id, "base64"));
+          const subKey = subkey(
+            tKey,
+            Buffer.from(project.project_id, "base64"),
+          );
           const paddedSubKey = subKey.padStart(64, "0");
           const { sk } = getED25519Key(paddedSubKey);
           const keyPair = Keypair.fromSecretKey(sk);
-          userDapps[keyPair.publicKey.toBase58()] = `${project.name} (${project.hostname})`;
+          userDapps[
+            keyPair.publicKey.toBase58()
+          ] = `${project.name} (${project.hostname})`;
           accounts.push({
             app: `${project.name}`,
             solanaPrivKey: base58.encode(keyPair.secretKey),
@@ -175,10 +206,16 @@ endLogin();
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center">
+  <div
+    class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center"
+  >
     <Loader v-if="loading" :use-spinner="true" />
     <div v-else class="account_container">
-      <div class="text-xl text-app-text-600 dark:text-app-text-dark-400 font-bold mb-8 text-center">{{ t("login.selectAnAccount") }}</div>
+      <div
+        class="text-xl text-app-text-600 dark:text-app-text-dark-400 font-bold mb-8 text-center"
+      >
+        {{ t("login.selectAnAccount") }}
+      </div>
       <div class="flex flex-col items-center">
         <div class="account-list overflow-y-scroll no-scrollbar break-all">
           <button
@@ -197,8 +234,16 @@ endLogin();
                   : 'bg-white dark:bg-app-gray-700 hover:border-cyan-600 border border-app-gray-500 dark:border-transparent shadow dark:shadow-dark',
               ]"
             >
-              <div class="account-app font-bold text-app-text-600 dark:text-app-text-dark-500">{{ app }}</div>
-              <div class="account-address text_2--text text-app-text-600 dark:text-app-text-dark-500">{{ address }}</div>
+              <div
+                class="account-app font-bold text-app-text-600 dark:text-app-text-dark-500"
+              >
+                {{ app }}
+              </div>
+              <div
+                class="account-address text_2--text text-app-text-600 dark:text-app-text-dark-500"
+              >
+                {{ address }}
+              </div>
             </div>
           </button>
         </div>

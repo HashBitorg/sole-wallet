@@ -29,7 +29,11 @@ const messageModalState = reactive({
   messageStatus: STATUS.INFO as STATUS_TYPE,
 });
 
-const showMessageModal = (params: { messageTitle: string; messageDescription?: string; messageStatus: STATUS_TYPE }) => {
+const showMessageModal = (params: {
+  messageTitle: string;
+  messageDescription?: string;
+  messageStatus: STATUS_TYPE;
+}) => {
   const { messageDescription, messageTitle, messageStatus } = params;
   messageModalState.messageDescription = messageDescription || "";
   messageModalState.messageTitle = messageTitle;
@@ -58,9 +62,12 @@ watch(
     }
     log.info(scanner);
   },
-  { flush: "pre", immediate: true, deep: true }
+  { flush: "pre", immediate: true, deep: true },
 );
-const onDecode = (result: { data: string; cornerPoints: { x: number; y: number }[] }) => {
+const onDecode = (result: {
+  data: string;
+  cornerPoints: { x: number; y: number }[];
+}) => {
   log.info("decode");
   log.info(result);
   try {
@@ -116,7 +123,9 @@ const onApproved = async (tx: VersionedTransaction) => {
     // show error message
     // requestLink.value = "";
     showMessageModal({
-      messageTitle: `${t("walletTransfer.submitFailed")}: ${(e as Error)?.message || t("walletSettings.somethingWrong")}`,
+      messageTitle: `${t("walletTransfer.submitFailed")}: ${
+        (e as Error)?.message || t("walletSettings.somethingWrong")
+      }`,
       messageStatus: STATUS.ERROR,
     });
   }
@@ -140,7 +149,9 @@ const onReject = () => {
       @on-close="onMessageModalClosed"
     />
     <FullDivLoader v-if="loading" class="absolute" />
-    <button v-else-if="errMessage.length" type="button" @click="rescan">{{ errMessage }}</button>
+    <button v-else-if="errMessage.length" type="button" @click="rescan">
+      {{ errMessage }}
+    </button>
     <SolanaPay
       v-else-if="requestLink.length"
       class="spay z-40 sm:z-0"
@@ -148,7 +159,14 @@ const onReject = () => {
       @on-close-modal="onReject"
       @on-approved="onApproved"
     />
-    <video v-show="!requestLink.length" ref="el" class="qrscanner" muted webkit-playsinline="true" playsinline="true" />
+    <video
+      v-show="!requestLink.length"
+      ref="el"
+      class="qrscanner"
+      muted
+      webkit-playsinline="true"
+      playsinline="true"
+    />
   </div>
 </template>
 

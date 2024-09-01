@@ -9,8 +9,12 @@ import ControllerModule from "@/modules/controllers";
 
 const router = useRouter();
 const showRouterChild = ref(false);
-const selectedTab = ref<string>(`${router.currentRoute.value.meta.tab}` || "home");
-const shouldShowHeader = ref<boolean>(`${router.currentRoute.value.meta.tabHeader}` !== "false");
+const selectedTab = ref<string>(
+  `${router.currentRoute.value.meta.tab}` || "home",
+);
+const shouldShowHeader = ref<boolean>(
+  `${router.currentRoute.value.meta.tabHeader}` !== "false",
+);
 onMounted(() => {
   router.beforeResolve((to, from, next) => {
     selectedTab.value = `${to.meta.tab}`;
@@ -21,12 +25,20 @@ onMounted(() => {
   setTimeout(() => {
     showRouterChild.value = true;
   });
-  Sentry.setUser({ email: ControllerModule.torus?.userInfo?.email || ControllerModule.torus?.selectedAddress || "unknown" });
+  Sentry.setUser({
+    email:
+      ControllerModule.torus?.userInfo?.email ||
+      ControllerModule.torus?.selectedAddress ||
+      "unknown",
+  });
 });
 </script>
 <template>
   <WalletTabs :tab="selectedTab" :show-header="shouldShowHeader">
     <router-view v-if="showRouterChild"></router-view>
   </WalletTabs>
-  <LogoutRequiredModal :is-open="ControllerModule.logoutRequired" @on-close="ControllerModule.logout" />
+  <LogoutRequiredModal
+    :is-open="ControllerModule.logoutRequired"
+    @on-close="ControllerModule.logout"
+  />
 </template>

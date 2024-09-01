@@ -72,34 +72,67 @@ const lastUpdateString = computed(() => {
 </script>
 
 <template>
-  <div class="py-4 sm:mx-auto sm:px-6 lg:px-8 max-w-7xl mx-4 flex flex-col items-center">
-    <div class="mt-4 flex flex-col space-y-4 w-full sm:w-10/12 md:w-3/5 lg:w-1/2">
+  <div
+    class="py-4 sm:mx-auto sm:px-6 lg:px-8 max-w-7xl mx-4 flex flex-col items-center"
+  >
+    <div
+      class="mt-4 flex flex-col space-y-4 w-full sm:w-10/12 md:w-3/5 lg:w-1/2"
+    >
       <header>
         <div class="flex items-center max-w-7xl justify-between">
-          <h1 class="text-xl sm:text-3xl font-medium leading-tight text-app-text-500 dark:text-app-text-dark-400">
+          <h1
+            class="text-xl sm:text-3xl font-medium leading-tight text-app-text-500 dark:text-app-text-dark-400"
+          >
             {{ t(NAVIGATION_LIST["home"].title) }}
           </h1>
           <div class="flex items-center space-x-2">
-            <AddressAndScan class="hidden lg:flex" :selected-address="ControllerModule.selectedAddress" />
+            <AddressAndScan
+              class="hidden lg:flex"
+              :selected-address="ControllerModule.selectedAddress"
+            />
           </div>
         </div>
       </header>
       <WalletBalance :show-buttons="true" class="w-full" />
     </div>
-    <AddressAndScan class="flex lg:hidden mt-3" :selected-address="ControllerModule.selectedAddress" />
-    <div class="mt-4 lg:mt-8 flex flex-col space-y-4 w-full sm:w-10/12 md:w-3/5 lg:w-1/2">
-      <h2 class="-mb-2 text-base font-medium leading-tight text-app-text-500 dark:text-app-text-dark-400">Tokens</h2>
+    <AddressAndScan
+      class="flex lg:hidden mt-3"
+      :selected-address="ControllerModule.selectedAddress"
+    />
+    <div
+      class="mt-4 lg:mt-8 flex flex-col space-y-4 w-full sm:w-10/12 md:w-3/5 lg:w-1/2"
+    >
+      <h2
+        class="-mb-2 text-base font-medium leading-tight text-app-text-500 dark:text-app-text-dark-400"
+      >
+        Tokens
+      </h2>
       <TokensAssetsBalance />
       <div
         class="shadow dark:shadow_box cursor-pointer border border-app-gray-300 dark:border-transparent bg-white dark:bg-app-gray-700 rounded-md h-20 flex flex-col justify-center"
       >
-        <div class="dark:shadow_down flex flex-row justify-center items-center flex-auto px-4 border-b border-app-gray-300 dark:border-b-0">
+        <div
+          class="dark:shadow_down flex flex-row justify-center items-center flex-auto px-4 border-b border-app-gray-300 dark:border-b-0"
+        >
           <span class="flex flex-row justify-center items-center">
-            <p class="text-app-text-600 dark:text-app-text-dark-500 font-bold text-xs leading-3 truncate">Didn't See Your Token?</p></span
+            <p
+              class="text-app-text-600 dark:text-app-text-dark-500 font-bold text-xs leading-3 truncate"
+            >
+              Didn't See Your Token?
+            </p></span
           >
         </div>
-        <div class="flex flex-row justify-center items-center font-normal text-gray-500 text-xs flex-auto px-4">
-          <Button v-ga="HomePageInteractions.REFRESH" class="flex flex-column" variant="text" @click="importTokens"> Import Token </Button>
+        <div
+          class="flex flex-row justify-center items-center font-normal text-gray-500 text-xs flex-auto px-4"
+        >
+          <Button
+            v-ga="HomePageInteractions.REFRESH"
+            class="flex flex-column"
+            variant="text"
+            @click="importTokens"
+          >
+            Import Token
+          </Button>
         </div>
       </div>
       <!-- <div
@@ -113,8 +146,12 @@ const lastUpdateString = computed(() => {
         </div>
       </div> -->
       <div class="flex flex-col w-full items-end !mt-8">
-        <div class="bg-white border dark:border-0 dark:bg-app-gray-700 flex items-center space-x-2 py-2 px-4 rounded-full w-fit">
-          <RefreshIcon class="w-3 h-3 text-app-text-500 dark:text-app-text-dark-400" />
+        <div
+          class="bg-white border dark:border-0 dark:bg-app-gray-700 flex items-center space-x-2 py-2 px-4 rounded-full w-fit"
+        >
+          <RefreshIcon
+            class="w-3 h-3 text-app-text-500 dark:text-app-text-dark-400"
+          />
           <span
             v-ga="HomePageInteractions.REFRESH"
             class="text-app-text-500 dark:text-app-text-dark-400 text-xs cursor-pointer"
@@ -123,7 +160,9 @@ const lastUpdateString = computed(() => {
             >Refresh Tokens</span
           >
         </div>
-        <span class="text-app-text-400 text-xs mt-2">{{ lastUpdateString }}</span>
+        <span class="text-app-text-400 text-xs mt-2">{{
+          lastUpdateString
+        }}</span>
       </div>
     </div>
     <ImportToken

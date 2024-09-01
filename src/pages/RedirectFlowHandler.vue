@@ -10,7 +10,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center">
+  <div
+    class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center"
+  >
     <Loader :use-spinner="true" />
   </div>
 </template>

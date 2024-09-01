@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { PopupWhitelabelData, ProviderConfig } from "@toruslabs/base-controllers";
+import {
+  PopupWhitelabelData,
+  ProviderConfig,
+} from "@toruslabs/base-controllers";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 
 import FullDivLoader from "@/components/FullDivLoader.vue";
 import ProviderChangeComponent from "@/components/providerChange/ProviderChange.vue";
 import ControllerModule, { torus } from "@/modules/controllers";
 
-import { redirectToResult, useRedirectFlow } from "../../utils/redirectflowHelpers";
+import {
+  redirectToResult,
+  useRedirectFlow,
+} from "../../utils/redirectflowHelpers";
 
 const { params, req_id, resolveRoute, method, jsonrpc } = useRedirectFlow();
 const loading = ref(true);
@@ -31,14 +37,26 @@ onMounted(async () => {
   finalProviderData.fromNetwork = torus.currentNetworkName;
   loading.value = false;
 });
-const currentNetwork = computed(() => ControllerModule.selectedNetworkDisplayName);
+const currentNetwork = computed(
+  () => ControllerModule.selectedNetworkDisplayName,
+);
 watch(currentNetwork, () => {
-  if (currentNetwork.value === (params as ProviderConfig).displayName) redirectToResult(jsonrpc, { success: true, method }, req_id, resolveRoute);
+  if (currentNetwork.value === (params as ProviderConfig).displayName)
+    redirectToResult(jsonrpc, { success: true, method }, req_id, resolveRoute);
 });
 const approveProviderChange = async (): Promise<void> => {
   loading.value = true;
   torus.setNetwork(params as ProviderConfig);
-  setTimeout(() => redirectToResult(jsonrpc, { success: false, method }, req_id, resolveRoute), 5000);
+  setTimeout(
+    () =>
+      redirectToResult(
+        jsonrpc,
+        { success: false, method },
+        req_id,
+        resolveRoute,
+      ),
+    5000,
+  );
 };
 const denyProviderChange = async () => {
   loading.value = true;

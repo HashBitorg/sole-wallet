@@ -4,39 +4,78 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import FullDivLoader from "@/components/FullDivLoader.vue";
 import { useEstimateChanges } from "@/components/payments/EstimateChangesComposable";
-import { getTokenFromMint, nftTokens } from "@/components/transfer/token-helper";
+import {
+  getTokenFromMint,
+  nftTokens,
+} from "@/components/transfer/token-helper";
 import TransferNFT from "@/components/transfer/TransferNFT.vue";
 
 import ControllerModule, { torus } from "../../modules/controllers";
 import { delay } from "../../utils/helpers";
-import { redirectToResult, useRedirectFlow } from "../../utils/redirectflowHelpers";
-import { calculateTxFee, generateSPLTransaction } from "../../utils/solanaHelpers";
+import {
+  redirectToResult,
+  useRedirectFlow,
+} from "../../utils/redirectflowHelpers";
+import {
+  calculateTxFee,
+  generateSPLTransaction,
+} from "../../utils/solanaHelpers";
 
 const { params, method, resolveRoute, req_id, jsonrpc } = useRedirectFlow();
-const { hasEstimationError, estimatedBalanceChange, estimationInProgress, estimateChanges } = useEstimateChanges();
+const {
+  hasEstimationError,
+  estimatedBalanceChange,
+  estimationInProgress,
+  estimateChanges,
+} = useEstimateChanges();
 
 const loading = ref(true);
 const transactionFee = ref(0);
 const transaction = ref<VersionedTransaction>();
-const selectedNft = computed(() => getTokenFromMint(nftTokens.value, params.mint_add));
+const selectedNft = computed(() =>
+  getTokenFromMint(nftTokens.value, params.mint_add),
+);
 
 onMounted(async () => {
   // TODO: This can't be guaranteed
   if (!params?.mint_add || !params.receiver_add)
-    redirectToResult(jsonrpc, { message: "Invalid or Missing Params", success: false, method }, req_id, resolveRoute);
+    redirectToResult(
+      jsonrpc,
+      { message: "Invalid or Missing Params", success: false, method },
+      req_id,
+      resolveRoute,
+    );
   setTimeout(() => {
     if (selectedNft.value === undefined)
-      redirectToResult(jsonrpc, { message: "Selected NFT not found", success: false, method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { message: "Selected NFT not found", success: false, method },
+        req_id,
+        resolveRoute,
+      );
   }, 2_000);
 });
 
 watch(selectedNft, async () => {
   if (selectedNft.value?.mintAddress && loading.value) {
     loading.value = false;
-    transaction.value = await generateSPLTransaction(params.receiver_add, 1, selectedNft.value, ControllerModule.selectedAddress, torus.connection);
+    transaction.value = await generateSPLTransaction(
+      params.receiver_add,
+      1,
+      selectedNft.value,
+      ControllerModule.selectedAddress,
+      torus.connection,
+    );
 
-    const { fee } = await calculateTxFee(transaction.value.message, torus.connection);
-    estimateChanges(transaction.value, torus.connection, ControllerModule.selectedAddress);
+    const { fee } = await calculateTxFee(
+      transaction.value.message,
+      torus.connection,
+    );
+    estimateChanges(
+      transaction.value,
+      torus.connection,
+      ControllerModule.selectedAddress,
+    );
     transactionFee.value = fee / LAMPORTS_PER_SOL;
   }
 });
@@ -47,16 +86,37 @@ async function confirmTransfer() {
   try {
     if (selectedNft.value && transaction.value) {
       const res = await torus.transfer(transaction.value);
-      redirectToResult(jsonrpc, { signature: res, success: true, method }, req_id, resolveRoute);
-    } else redirectToResult(jsonrpc, { message: "Selected NFT not found", success: false, method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { signature: res, success: true, method },
+        req_id,
+        resolveRoute,
+      );
+    } else
+      redirectToResult(
+        jsonrpc,
+        { message: "Selected NFT not found", success: false, method },
+        req_id,
+        resolveRoute,
+      );
   } catch (error) {
-    redirectToResult(jsonrpc, { message: "Could not process transaction", success: false, method }, req_id, resolveRoute);
+    redirectToResult(
+      jsonrpc,
+      { message: "Could not process transaction", success: false, method },
+      req_id,
+      resolveRoute,
+    );
   }
 }
 
 async function cancelTransfer() {
   loading.value = true;
-  redirectToResult(jsonrpc, { message: "Transaction cancelled", success: false, method }, req_id, resolveRoute);
+  redirectToResult(
+    jsonrpc,
+    { message: "Transaction cancelled", success: false, method },
+    req_id,
+    resolveRoute,
+  );
 }
 </script>
 

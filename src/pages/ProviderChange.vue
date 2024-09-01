@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { BROADCAST_CHANNELS, BroadcastChannelHandler, broadcastChannelOptions, POPUP_RESULT, PopupWhitelabelData } from "@toruslabs/base-controllers";
+import {
+  BROADCAST_CHANNELS,
+  BroadcastChannelHandler,
+  broadcastChannelOptions,
+  POPUP_RESULT,
+  PopupWhitelabelData,
+} from "@toruslabs/base-controllers";
 import { BroadcastChannel } from "@toruslabs/broadcast-channel";
 import { onErrorCaptured, onMounted, reactive, ref } from "vue";
 
@@ -9,7 +15,9 @@ import { openCrispChat } from "@/utils/helpers";
 
 import { ProviderChangeChannelEventData } from "../utils/interfaces";
 
-const channel = `${BROADCAST_CHANNELS.PROVIDER_CHANGE_CHANNEL}_${new URLSearchParams(window.location.search).get("instanceId")}`;
+const channel = `${
+  BROADCAST_CHANNELS.PROVIDER_CHANGE_CHANNEL
+}_${new URLSearchParams(window.location.search).get("instanceId")}`;
 const loading = ref(true);
 
 interface FinalTxData {
@@ -33,8 +41,11 @@ onErrorCaptured(() => {
 });
 
 onMounted(async () => {
-  const bcHandler = new BroadcastChannelHandler(BROADCAST_CHANNELS.PROVIDER_CHANGE_CHANNEL);
-  const providerData = await bcHandler.getMessageFromChannel<ProviderChangeChannelEventData>();
+  const bcHandler = new BroadcastChannelHandler(
+    BROADCAST_CHANNELS.PROVIDER_CHANGE_CHANNEL,
+  );
+  const providerData =
+    await bcHandler.getMessageFromChannel<ProviderChangeChannelEventData>();
   finalProviderData.origin = providerData.origin;
   finalProviderData.toNetwork = providerData.newNetwork.displayName;
   finalProviderData.fromNetwork = providerData.currentNetwork;

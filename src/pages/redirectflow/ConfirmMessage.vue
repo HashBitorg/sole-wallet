@@ -7,7 +7,10 @@ import Permissions from "@/components/permissions/Permissions.vue";
 import { SignMessageChannelDataType } from "@/utils/enums";
 
 import { torus } from "../../modules/controllers";
-import { redirectToResult, useRedirectFlow } from "../../utils/redirectflowHelpers";
+import {
+  redirectToResult,
+  useRedirectFlow,
+} from "../../utils/redirectflowHelpers";
 
 const { params, method, resolveRoute, jsonrpc, req_id } = useRedirectFlow();
 const loading = ref(true);
@@ -22,7 +25,8 @@ const msg_data = reactive<MsgData>({
 });
 
 onMounted(async () => {
-  if (Object.keys(params).length) params.message = Uint8Array.from(Object.values(params?.message));
+  if (Object.keys(params).length)
+    params.message = Uint8Array.from(Object.values(params?.message));
   let channel_msg: Partial<SignMessageChannelDataType>;
   try {
     if (params?.message)
@@ -32,7 +36,12 @@ onMounted(async () => {
         origin: window.location.origin,
       };
     else {
-      redirectToResult(jsonrpc, { message: "Invalid or Missing Params", success: false, method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { message: "Invalid or Missing Params", success: false, method },
+        req_id,
+        resolveRoute,
+      );
       return;
     }
 
@@ -55,9 +64,18 @@ const approveTxn = async (): Promise<void> => {
       },
       method: "sign_message",
     },
-    true
+    true,
   );
-  redirectToResult(jsonrpc, { data: { signature: Buffer.from(res).toString("hex") }, success: true, method }, req_id, resolveRoute);
+  redirectToResult(
+    jsonrpc,
+    {
+      data: { signature: Buffer.from(res).toString("hex") },
+      success: true,
+      method,
+    },
+    req_id,
+    resolveRoute,
+  );
 };
 
 const rejectTxn = async () => {
@@ -68,5 +86,11 @@ const rejectTxn = async () => {
 
 <template>
   <FullDivLoader v-if="loading" />
-  <Permissions v-else :requested-from="msg_data.origin" :approval-message="msg_data.message" @on-approved="approveTxn" @on-rejected="rejectTxn" />
+  <Permissions
+    v-else
+    :requested-from="msg_data.origin"
+    :approval-message="msg_data.message"
+    @on-approved="approveTxn"
+    @on-rejected="rejectTxn"
+  />
 </template>

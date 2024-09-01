@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { TransactionMessage, VersionedMessage, VersionedTransaction } from "@solana/web3.js";
+import {
+  TransactionMessage,
+  VersionedMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import log from "loglevel";
 import { onErrorCaptured, onMounted, ref } from "vue";
 
@@ -9,7 +13,11 @@ import { useEstimateChanges } from "@/components/payments/EstimateChangesComposa
 import PermissionsTx from "@/components/permissionsTx/PermissionsTx.vue";
 import { TransactionChannelDataType } from "@/utils/enums";
 import { hideCrispButton, openCrispChat } from "@/utils/helpers";
-import { decodeAllInstruction, DecodedDataType, decodeInstruction } from "@/utils/instructionDecoder";
+import {
+  decodeAllInstruction,
+  DecodedDataType,
+  decodeInstruction,
+} from "@/utils/instructionDecoder";
 import { FinalTxData } from "@/utils/interfaces";
 import { redirectToResult, useRedirectFlow } from "@/utils/redirectflowHelpers";
 import { calculateTxFee, parsingTransferAmount } from "@/utils/solanaHelpers";
@@ -17,7 +25,12 @@ import { calculateTxFee, parsingTransferAmount } from "@/utils/solanaHelpers";
 import ControllerModule, { torus } from "../../modules/controllers";
 
 const { params, method, jsonrpc, req_id, resolveRoute } = useRedirectFlow();
-const { hasEstimationError, estimatedBalanceChange, estimationInProgress, estimateChanges } = useEstimateChanges();
+const {
+  hasEstimationError,
+  estimatedBalanceChange,
+  estimationInProgress,
+  estimateChanges,
+} = useEstimateChanges();
 
 const finalTxData = ref<FinalTxData>();
 
@@ -43,7 +56,12 @@ onMounted(async () => {
         origin: window.origin,
       };
     } else {
-      redirectToResult(jsonrpc, { message: "Invalid or Missing Params", method }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { message: "Invalid or Missing Params", method },
+        req_id,
+        resolveRoute,
+      );
       return;
     }
     origin.value = txData.origin as string;
@@ -51,32 +69,53 @@ onMounted(async () => {
 
     // TODO: currently, controllers does not support multi transaction flow
     if (txData.type === "sign_all_transactions") {
-      const decoded = decodeAllInstruction(txData.message as string[], txData.messageOnly || false, torus.connection);
+      const decoded = decodeAllInstruction(
+        txData.message as string[],
+        txData.messageOnly || false,
+        torus.connection,
+      );
       decodedInst.value = decoded;
       estimationInProgress.value = false;
-      hasEstimationError.value = "Failed to simulate transaction for balance changes";
+      hasEstimationError.value =
+        "Failed to simulate transaction for balance changes";
       loading.value = false;
       return;
     }
 
     if (txData.messageOnly) {
-      const msgObj = VersionedMessage.deserialize(Buffer.from(txData.message as string, "hex"));
+      const msgObj = VersionedMessage.deserialize(
+        Buffer.from(txData.message as string, "hex"),
+      );
       tx.value = new VersionedTransaction(msgObj);
     } else {
-      tx.value = VersionedTransaction.deserialize(Buffer.from(txData.message as string, "hex"));
+      tx.value = VersionedTransaction.deserialize(
+        Buffer.from(txData.message as string, "hex"),
+      );
     }
 
-    estimateChanges(tx.value, torus.connection, ControllerModule.selectedAddress);
+    estimateChanges(
+      tx.value,
+      torus.connection,
+      ControllerModule.selectedAddress,
+    );
     // const isGasless = tx.value.feePayer?.toBase58() !== txData.signer;
     const txFee = await calculateTxFee(tx.value.message, torus.connection);
-    const { instructions } = TransactionMessage.decompile(tx.value.message, txFee.lookupArgs);
+    const { instructions } = TransactionMessage.decompile(
+      tx.value.message,
+      txFee.lookupArgs,
+    );
 
     try {
       decodedInst.value = instructions.map((inst) => {
         return decodeInstruction(inst);
       });
 
-      finalTxData.value = await parsingTransferAmount(tx.value, txFee.fee, false, txFee.lookupArgs);
+      finalTxData.value = await parsingTransferAmount(
+        tx.value,
+        txFee.fee,
+        false,
+        txFee.lookupArgs,
+      );
     } catch (e) {
       log.error(e);
     }
@@ -93,19 +132,39 @@ const approveTxn = async (): Promise<void> => {
   try {
     if (method === "send_transaction" && tx.value) {
       res = await torus.transfer(tx.value, params);
-      redirectToResult(jsonrpc, { data: { signature: res }, method, success: true }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { data: { signature: res }, method, success: true },
+        req_id,
+        resolveRoute,
+      );
     } else if (method === "sign_transaction" && tx.value) {
       res = torus.UNSAFE_signTransaction(tx.value);
-      redirectToResult(jsonrpc, { data: { signature: res.serialize() }, method, success: true }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { data: { signature: res.serialize() }, method, success: true },
+        req_id,
+        resolveRoute,
+      );
     } else if (method === "sign_all_transactions") {
       res = await torus.UNSAFE_signAllTransactions({ params } as {
         params: { message: string[] };
         method: string;
       });
-      redirectToResult(jsonrpc, { data: { signatures: res }, method, success: true }, req_id, resolveRoute);
+      redirectToResult(
+        jsonrpc,
+        { data: { signatures: res }, method, success: true },
+        req_id,
+        resolveRoute,
+      );
     } else throw new Error();
   } catch (e) {
-    redirectToResult(jsonrpc, { success: false, method, error: (e as Error).message }, req_id, resolveRoute);
+    redirectToResult(
+      jsonrpc,
+      { success: false, method, error: (e as Error).message },
+      req_id,
+      resolveRoute,
+    );
   }
 };
 

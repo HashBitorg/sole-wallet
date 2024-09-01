@@ -3,9 +3,13 @@ import { RedirectHandler } from "@toruslabs/base-controllers";
 import Loader from "@toruslabs/vue-components/common/Loader.vue";
 import { onMounted } from "vue";
 
-import { redirectToResult, useRedirectFlow } from "../utils/redirectflowHelpers";
+import {
+  redirectToResult,
+  useRedirectFlow,
+} from "../utils/redirectflowHelpers";
 
-const { isRedirectFlow, method, resolveRoute, req_id, jsonrpc } = useRedirectFlow();
+const { isRedirectFlow, method, resolveRoute, req_id, jsonrpc } =
+  useRedirectFlow();
 
 const checkTopupSuccess = async () => {
   const queryParameters = new URLSearchParams(window.location.search);
@@ -24,7 +28,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center">
+  <div
+    class="min-h-screen bg-white dark:bg-app-gray-800 flex justify-center items-center"
+  >
     <Loader :use-spinner="true" />
   </div>
 </template>

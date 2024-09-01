@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { BROADCAST_CHANNELS, BroadcastChannelHandler, broadcastChannelOptions, POPUP_RESULT } from "@toruslabs/base-controllers";
+import {
+  BROADCAST_CHANNELS,
+  BroadcastChannelHandler,
+  broadcastChannelOptions,
+  POPUP_RESULT,
+} from "@toruslabs/base-controllers";
 import { BroadcastChannel } from "@toruslabs/broadcast-channel";
 import log from "loglevel";
 import { onErrorCaptured, onMounted, reactive, ref } from "vue";
@@ -9,7 +14,9 @@ import Permissions from "@/components/permissions/Permissions.vue";
 import { SignMessageChannelDataType } from "@/utils/enums";
 import { openCrispChat } from "@/utils/helpers";
 
-const channel = `${BROADCAST_CHANNELS.TRANSACTION_CHANNEL}_${new URLSearchParams(window.location.search).get("instanceId")}`;
+const channel = `${
+  BROADCAST_CHANNELS.TRANSACTION_CHANNEL
+}_${new URLSearchParams(window.location.search).get("instanceId")}`;
 const loading = ref(true);
 
 interface MsgData {
@@ -28,8 +35,11 @@ onErrorCaptured(() => {
 onMounted(async () => {
   let channel_msg: Partial<SignMessageChannelDataType>;
   try {
-    const bcHandler = new BroadcastChannelHandler(BROADCAST_CHANNELS.TRANSACTION_CHANNEL);
-    channel_msg = await bcHandler.getMessageFromChannel<SignMessageChannelDataType>();
+    const bcHandler = new BroadcastChannelHandler(
+      BROADCAST_CHANNELS.TRANSACTION_CHANNEL,
+    );
+    channel_msg =
+      await bcHandler.getMessageFromChannel<SignMessageChannelDataType>();
 
     // TODO: add support to sign array of messages
     msg_data.data = Buffer.from(channel_msg.data as string, "hex");
@@ -65,5 +75,11 @@ const rejectTxn = async () => {
 
 <template>
   <FullDivLoader v-if="loading" />
-  <Permissions v-else :requested-from="msg_data.origin" :approval-message="msg_data.message" @on-approved="approveTxn" @on-rejected="rejectTxn" />
+  <Permissions
+    v-else
+    :requested-from="msg_data.origin"
+    :approval-message="msg_data.message"
+    @on-approved="approveTxn"
+    @on-rejected="rejectTxn"
+  />
 </template>

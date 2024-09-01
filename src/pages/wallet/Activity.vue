@@ -4,7 +4,10 @@ import { useI18n } from "vue-i18n";
 
 import ActivityItem from "@/components/activity/ActivityItem.vue";
 import { SelectField } from "@/components/common";
-import { ActivityPageInteractions, trackUserClick } from "@/directives/google-analytics";
+import {
+  ActivityPageInteractions,
+  trackUserClick,
+} from "@/directives/google-analytics";
 import ControllerModule from "@/modules/controllers";
 
 const ACTIVITY_ACTION_ALL = "walletActivity.allTransactions";
@@ -71,15 +74,24 @@ const sixMonthAgoDate = computed(() => {
   const minDate = new Date();
   return minDate.setMonth(minDate.getMonth() - 6);
 });
-const allTransactions = computed(() => ControllerModule.selectedNetworkTransactions);
+const allTransactions = computed(
+  () => ControllerModule.selectedNetworkTransactions,
+);
 watch(actionType, () => {
-  trackUserClick(ActivityPageInteractions.FILTER_TRANSACTION_TYPE + actionType.value.label);
+  trackUserClick(
+    ActivityPageInteractions.FILTER_TRANSACTION_TYPE + actionType.value.label,
+  );
 });
 watch(period, () => {
-  trackUserClick(ActivityPageInteractions.FILTER_TRANSACTION_TIME + period.value.label);
+  trackUserClick(
+    ActivityPageInteractions.FILTER_TRANSACTION_TIME + period.value.label,
+  );
 });
 const filteredTransaction = computed(() => {
-  const selectedAction = actionType.value.value === ACTIVITY_ACTION_ALL ? "" : actionType.value.value;
+  const selectedAction =
+    actionType.value.value === ACTIVITY_ACTION_ALL
+      ? ""
+      : actionType.value.value;
   const regExAction = new RegExp(selectedAction, "i");
 
   const transactions = allTransactions.value.filter((item) => {
@@ -118,9 +130,15 @@ const filteredTransaction = computed(() => {
 
 <template>
   <div v-if="!filteredTransaction.length" class="pt-16 text-center">
-    <span class="text-lg text-app-text-500 dark:text-app-text-dark-600">{{ t("walletActivity.noTransaction") }}</span>
+    <span class="text-lg text-app-text-500 dark:text-app-text-dark-600">{{
+      t("walletActivity.noTransaction")
+    }}</span>
   </div>
-  <div v-for="tx in filteredTransaction" :key="tx.signature" class="pt-7 transaction-activity">
+  <div
+    v-for="tx in filteredTransaction"
+    :key="tx.signature"
+    class="pt-7 transaction-activity"
+  >
     <ActivityItem :activity="tx" />
   </div>
   <Teleport to="#rightPanel">
