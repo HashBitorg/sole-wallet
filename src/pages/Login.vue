@@ -66,9 +66,6 @@ const socialLoginOptions = [
 
 const listOfChains = ref<{ value: string; label: string; img?: string; link?: string }[]>([
   { label: "Solana", value: "Solana", img: "icon-solana.svg", link: AVAILABLE_WEBSITES.Solana },
-  { label: "Ethereum", value: "Ethereum", img: "icon-ethereum.svg", link: AVAILABLE_WEBSITES.Ethereum },
-  { label: "Polygon", value: "Polygon", img: "icon-polygon.svg", link: AVAILABLE_WEBSITES.Polygon },
-  { label: "Binance", value: "Binance", img: "icon-binance.svg", link: AVAILABLE_WEBSITES.Binance },
 ]);
 const selectedChain = ref(listOfChains.value[0]);
 
@@ -164,7 +161,7 @@ watch(
               height="1.5rem"
               width="auto"
               class="block h-6 w-auto my-7"
-              :src="require(`../assets/torus-logo-${app.isDarkMode ? 'white' : 'blue'}.svg`)"
+              :src="require(`../assets/torus-logo-${app.isDarkMode ? 'white' : 'blue'}.png`)"
               alt="Torus Logo"
             />
             <div class="font-header text-app-text-500 dark:text-app-text-dark-500 text-2xl ml-auto mr-auto flex">

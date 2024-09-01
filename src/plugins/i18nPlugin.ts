@@ -14,7 +14,8 @@ export const languageMap: Record<string, string> = {
   ja: "japanese",
   ko: "korean",
   zh: "mandarin",
-  es: "spanish",
+  es: "spanish", 
+  it: "italian",
 };
 
 export function setI18nLanguage(i18n: I18n, locale: string) {
